@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from database.models.user_model import User
+from database.models import User
 
 
 class UserRepository:
@@ -8,6 +8,7 @@ class UserRepository:
 
     async def get_by_id(self, user_id: int) -> User | None:
         user = await self.session.get(User, user_id)
+
         return user
 
     async def add(self, user_id: int) -> None:

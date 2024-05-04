@@ -1,6 +1,6 @@
 from aiogram import Bot, Dispatcher
 import asyncio
-from handlers import main_handlers, callback_handlers
+from handlers import main_handlers, admin_handlers, faq_handlers
 from dotenv import load_dotenv
 import os
 
@@ -14,7 +14,8 @@ bot = Bot(token=os.getenv('BOT_TOKEN'))
 dp = Dispatcher()
 
 dp.include_router(main_handlers.router)
-dp.include_router(callback_handlers.router)
+dp.include_router(admin_handlers.router)
+dp.include_router(faq_handlers.router)
 
 
 async def on_startup(bot):
