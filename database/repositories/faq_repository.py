@@ -18,5 +18,4 @@ class FaqRepository:
 
     async def get_answer_by_question(self, question):
         answer = (await self.session.execute(select(Faq).filter_by(question=question))).scalar_one()
-
         return answer
