@@ -10,7 +10,7 @@ from utils.filters import ServicesFilter
 
 from database.repositories.service_repository import ServiceRepository
 
-from keyboards.faq_or_sevices_keyboard import kb_builder
+from keyboards.keyboard_builder import kb_builder
 
 
 router = Router()

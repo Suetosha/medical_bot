@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from database.models import CallRequest
-from sqlalchemy import select
+
 
 
 class CallRequestRepository:

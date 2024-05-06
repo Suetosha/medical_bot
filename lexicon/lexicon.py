@@ -59,6 +59,16 @@ CALL_REQUEST_LEXICON = {
 
 }
 
+
+APPOINTMENT_LEXICON = {
+    'choose_department': 'Выберите отделение',
+    'choose_doctor': 'Выберите врача'
+
+
+}
+
+
+
 FAQ_LEXICON = {
 
     'choose_faq': 'Выберите интересующий вас вопрос',

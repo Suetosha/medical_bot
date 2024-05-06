@@ -16,3 +16,12 @@ class FSMFillServiceForm(StatesGroup):
     fill_service = State()
     fill_answer = State()
 
+
+
+class FSMFillAppointmentForm(StatesGroup):
+    fill_specialization = State()
+    fill_doctor = State()
+    fill_date = State()
+    fill_time = State()
+    fill_name = State()
+    fill_phone_number = State()

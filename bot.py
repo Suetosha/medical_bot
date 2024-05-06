@@ -1,6 +1,7 @@
 from aiogram import Bot, Dispatcher
 import asyncio
-from handlers import main_handlers, admin_handlers, faq_handlers, call_request_handlers, services_handlers
+from handlers import (main_handlers, admin_handlers, faq_handlers,
+                      call_request_handlers, services_handlers, appointment_handlers)
 from dotenv import load_dotenv
 import os
 
@@ -17,6 +18,7 @@ dp.include_router(main_handlers.router)
 dp.include_router(admin_handlers.router)
 dp.include_router(faq_handlers.router)
 dp.include_router(call_request_handlers.router)
+dp.include_router(appointment_handlers.router)
 dp.include_router(services_handlers.router)
 
 

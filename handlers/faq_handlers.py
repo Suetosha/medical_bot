@@ -10,7 +10,7 @@ from utils.filters import FAQFilter
 
 from database.repositories.faq_repository import FaqRepository
 
-from keyboards.faq_or_sevices_keyboard import kb_builder
+from keyboards.keyboard_builder import kb_builder
 
 
 router = Router()

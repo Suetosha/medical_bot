@@ -1,6 +1,6 @@
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, relationship
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import Text, String
+from sqlalchemy import Text, String, ForeignKey
 
 
 class Base(DeclarativeBase):
@@ -37,5 +37,20 @@ class Services(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     service: Mapped[str] = mapped_column(Text)
     answer: Mapped[str] = mapped_column(Text)
+
+
+class Departments(Base):
+    __tablename__ = 'departments'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    specialization: Mapped[str] = mapped_column(String)
+
+
+class Doctors(Base):
+    __tablename__ = 'doctors'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    doctor: Mapped[str] = mapped_column(String)
+    department_id: Mapped[int] = mapped_column(ForeignKey("departments.id"))
 
 
