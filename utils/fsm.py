@@ -17,11 +17,31 @@ class FSMFillServiceForm(StatesGroup):
     fill_answer = State()
 
 
-
 class FSMFillAppointmentForm(StatesGroup):
+    edit_appointment = State()
+    update_object = State()
+
+
     fill_specialization = State()
     fill_doctor = State()
     fill_date = State()
     fill_time = State()
     fill_name = State()
-    fill_phone_number = State()
+
+
+
+class FSMFillSlotForm(StatesGroup):
+    fill_department = State()
+    fill_doctor = State()
+    fill_time = State()
+
+
+class FSMDeleteSlotForm(StatesGroup):
+    fill_department = State()
+    fill_doctor = State()
+    delete_slot_process = State()
+
+
+
+
+

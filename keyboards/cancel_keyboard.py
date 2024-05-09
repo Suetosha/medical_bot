@@ -3,5 +3,5 @@ from lexicon.lexicon import MAIN_MENU_LEXICON
 
 
 def build_cancel_keyboard():
-    markup = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text=MAIN_MENU_LEXICON['back'])]], resize_keyboard=True)
+    markup = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text=MAIN_MENU_LEXICON['cancel'])]], resize_keyboard=True)
     return markup

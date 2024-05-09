@@ -14,11 +14,10 @@ MAIN_MENU_LEXICON = {
 
     'admin_panel': 'Панель администратора',
 
-    'back': 'Назад',
+    'cancel': 'Отменить',
 
     'main_menu': 'Вы попали в главное меню'
 }
-
 
 ADMIN_LEXICON = {
 
@@ -44,7 +43,46 @@ ADMIN_LEXICON = {
 
     'fill_service_answer': 'Напишите описание услуги',
 
+    'add_new_slot': 'Добавить слот у врача',
+
+    'fill_doctor': 'Нажмите на врача',
+
+    'fill_department': 'Нажмите на отделение',
+
+    'doctor_is_not_exist': 'Такого врача нет в базе данных, введите ещё раз',
+
+    'fill_time': 'Введите новое время в формате HH:mm',
+
+    'wrong_time': 'Введено некорректное время, введите еще раз\n'
+                  'Пример: 11:30',
+
+    'slot_added': 'Слот {} удачно добавлен к {}',
+
+    'slot_already_added': 'Этот слот уже был добавлен',
+
+    'delete_doctors_slot': 'Удалить слот у врача',
+
+    'delete_slot_process': 'Для удаления нажмите на нужный слот',
+
+    'slot_removed': 'Слот {} удален',
+
+    'edit_appointment': 'Редактирование записей к врачу',
+
+    'choose_appointment': 'Выберите запись для редактирования',
+
+    'no_appointments': 'Записей нет',
+
+    'appointment_info':
+            'Информация о записи:\n'
+            'Отделение {}\n'
+            'Врач {}\n'
+            'Дата {}\n'
+            'Время {}\n'
+            'ФИО пациента {}\n'
+
+
 }
+
 
 CALL_REQUEST_LEXICON = {
 
@@ -59,15 +97,18 @@ CALL_REQUEST_LEXICON = {
 
 }
 
-
 APPOINTMENT_LEXICON = {
     'choose_department': 'Выберите отделение',
-    'choose_doctor': 'Выберите врача'
-
+    'choose_doctor': 'Выберите врача',
+    'choose_date': 'Выберите дату',
+    'choose_time': 'Вы выбрали {}, теперь нужно выбрать время:',
+    'fill_name': 'Введите свое ФИО',
+    'fill_phone_number': 'Введите свой номер телефона',
+    'no_free_slots': 'К этому врачу нет записи, вы можете выбрать другого',
+    'success': '{}, вы записаны {} в {} часов к {}',
+    'success_update': 'Запись обновлена'
 
 }
-
-
 
 FAQ_LEXICON = {
 
@@ -79,14 +120,12 @@ SERVICES_LEXICON = {
     'choose_service': 'Выберите интересующую вас услугу'
 }
 
-
 START_COMMAND = {
 
-    'info':           'Здравствуйте!\n'
-                      'Вас приветствует помощник медицинского центра'
+    'info': 'Здравствуйте!\n'
+            'Вас приветствует помощник медицинского центра'
 
 }
-
 
 CLINIC_SCHEDULE = {
 
@@ -95,7 +134,6 @@ CLINIC_SCHEDULE = {
             'СБ. с 8-00 до 20-00\n'
             'ВС. с 8-00 до 17-00',
 }
-
 
 CONTACT_INFORMATION = {
 

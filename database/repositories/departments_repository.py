@@ -20,3 +20,8 @@ class DepartmentsRepository:
         data = (await self.session.scalars(select(Departments))).all()
         data = [i.specialization for i in data]
         return data
+
+    async def get_department_by_id(self, id):
+        department = (await self.session.execute(select(Departments)
+                                                    .filter_by(id=id))).scalar_one().specialization
+        return department

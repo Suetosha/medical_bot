@@ -1,6 +1,7 @@
-from sqlalchemy.orm import DeclarativeBase, relationship
+import datetime
+from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import Text, String, ForeignKey
+from sqlalchemy import Text, String, ForeignKey, DateTime
 
 
 class Base(DeclarativeBase):
@@ -46,11 +47,33 @@ class Departments(Base):
     specialization: Mapped[str] = mapped_column(String)
 
 
+
+
 class Doctors(Base):
     __tablename__ = 'doctors'
 
     id: Mapped[int] = mapped_column(primary_key=True)
     doctor: Mapped[str] = mapped_column(String)
     department_id: Mapped[int] = mapped_column(ForeignKey("departments.id"))
+
+
+class Slots(Base):
+    __tablename__ = 'slots'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    doctor_id: Mapped[int] = mapped_column(ForeignKey("doctors.id"))
+    time: Mapped[str] = mapped_column(String)
+
+
+class Appointments(Base):
+    __tablename__ = 'appointments'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    patient: Mapped[str] = mapped_column(String)
+    department_id: Mapped[int] = mapped_column(ForeignKey("departments.id"))
+    doctor_id: Mapped[int] = mapped_column(ForeignKey("doctors.id"))
+    date_time = mapped_column(DateTime)
+
+
 
 

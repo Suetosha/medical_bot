@@ -25,3 +25,15 @@ class DoctorsRepository:
         doctors = (await self.session.execute(select(Doctors.doctor).filter_by(department_id=department_id))).fetchall()
         doctors = [i[0] for i in doctors]
         return doctors
+
+    async def get_id_by_doctor(self, doctor):
+        doctor_id = (await self.session.execute(select(Doctors).filter_by(doctor=doctor))).scalar_one().id
+        return doctor_id
+
+    async def get_doctor_by_id(self, id):
+        doctor = (await self.session.execute(select(Doctors).filter_by(id=id))).scalar_one().doctor
+        return doctor
+
+    async def is_doctor_exist(self, doctor):
+        doctors = await self.get_all()
+        return doctor in doctors

@@ -16,7 +16,7 @@ router = Router()
 
 
 @router.message(CommandStart())
-async def process_start_command(message: Message, session: AsyncSession):
+async def process_start_command(message: Message, session: AsyncSession, state: FSMContext):
     user_repo = UserRepository(session)
     user_id = message.from_user.id
 
@@ -24,12 +24,12 @@ async def process_start_command(message: Message, session: AsyncSession):
         await user_repo.add(user_id)
 
     admin_status = await user_repo.get_admin_status(user_id)
-
+    await state.clear()
     await message.answer(START_COMMAND['info'], reply_markup=build_menu_keyboard(admin_status))
 
 
-@router.message(F.text == MAIN_MENU_LEXICON['back'])
-async def process_back_command(message: Message, state: FSMContext, session: AsyncSession):
+@router.message(F.text == MAIN_MENU_LEXICON['cancel'])
+async def process_cancel_command(message: Message, state: FSMContext, session: AsyncSession):
 
     user_id = message.from_user.id
     user_repo = UserRepository(session)
