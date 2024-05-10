@@ -18,5 +18,4 @@ class ServiceRepository:
 
     async def get_answer_by_service(self, service):
         answer = (await self.session.execute(select(Services).filter_by(service=service))).scalar_one()
-        print(answer)
         return answer

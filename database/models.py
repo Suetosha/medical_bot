@@ -47,8 +47,6 @@ class Departments(Base):
     specialization: Mapped[str] = mapped_column(String)
 
 
-
-
 class Doctors(Base):
     __tablename__ = 'doctors'
 

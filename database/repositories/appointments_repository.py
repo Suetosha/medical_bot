@@ -1,7 +1,7 @@
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from database.models import Appointments, Doctors
-from database.repositories.doctors_repository import DoctorsRepository
+from database.models import Appointments
+
 
 class AppointmentsRepository:
     def __init__(self, session: AsyncSession):

@@ -2,6 +2,7 @@ from aiogram import Bot, Dispatcher
 import asyncio
 from handlers import (main_handlers, admin_handlers, faq_handlers,
                       call_request_handlers, services_handlers, appointment_handlers)
+
 from dotenv import load_dotenv
 import os
 
@@ -11,7 +12,7 @@ from middlewares.db import DataBaseSession
 from database.engine import create_db, drop_db, session_maker
 
 
-bot = Bot(token=os.getenv('BOT_TOKEN'))
+bot = Bot(token=os.getenv('BOT_TOKEN'), parse_mode="HTML")
 dp = Dispatcher()
 
 dp.include_router(main_handlers.router)

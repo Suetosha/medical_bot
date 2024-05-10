@@ -1,7 +1,7 @@
 from datetime import datetime as dt
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from database.models import Doctors, Appointments, Slots
+from database.models import Appointments, Slots
 from sqlalchemy import select, delete
 
 

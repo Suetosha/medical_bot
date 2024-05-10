@@ -22,6 +22,5 @@ class DepartmentsRepository:
         return data
 
     async def get_department_by_id(self, id):
-        department = (await self.session.execute(select(Departments)
-                                                    .filter_by(id=id))).scalar_one().specialization
+        department = (await self.session.execute(select(Departments).filter_by(id=id))).scalar_one().specialization
         return department

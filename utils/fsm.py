@@ -18,16 +18,16 @@ class FSMFillServiceForm(StatesGroup):
 
 
 class FSMFillAppointmentForm(StatesGroup):
+    # Для изменения записи в админке
     edit_appointment = State()
     update_object = State()
 
-
+    # Для добавления/изменения записи
     fill_specialization = State()
     fill_doctor = State()
     fill_date = State()
     fill_time = State()
     fill_name = State()
-
 
 
 class FSMFillSlotForm(StatesGroup):
