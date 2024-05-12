@@ -1,28 +1,33 @@
 import datetime
+
 from aiogram import Router, F
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram_calendar import SimpleCalendar, SimpleCalendarCallback, get_user_locale
+
 from sqlalchemy.ext.asyncio import AsyncSession
-from database.repositories.doctors_repository import DoctorsRepository
-from database.repositories.slots_repository import SlotsRepository
-from lexicon.lexicon import MAIN_KB_LEXICON
+
+
+from lexicon.lexicon import MAIN_KB_LEXICON, ADMIN_KB_LEXICON
 from lexicon.lexicon import APPOINTMENT_LEXICON
 
 from database.repositories.departments_repository import DepartmentsRepository
 from database.repositories.appointments_repository import AppointmentsRepository
-
+from database.repositories.doctors_repository import DoctorsRepository
+from database.repositories.slots_repository import SlotsRepository
 
 from keyboards.keyboard_builder import kb_builder
-from utils.admin_status import get_admin_status
-from utils.fsm import FSMFillAppointmentForm
 
+from utils.admin_status import get_admin_status
+from utils.filters import AdminFilter
+from utils.fsm import FSMFillAppointmentForm
 
 router = Router()
 
 
+# Процесс записи к врачу
 @router.message(F.text == MAIN_KB_LEXICON['appointment'], StateFilter(default_state))
 async def appointment_command(message: Message, state: FSMContext, session: AsyncSession):
     depo_repo = DepartmentsRepository(session)
@@ -91,16 +96,17 @@ async def get_time_process(message: Message, state: FSMContext):
     await message.answer(APPOINTMENT_LEXICON['fill_name'], reply_markup=ReplyKeyboardRemove())
 
 
-
-
-
-
-
-
-
 @router.message(StateFilter(FSMFillAppointmentForm.fill_name))
-async def get_phone_number_process(message: Message, state: FSMContext, session: AsyncSession):
+async def get_name_process(message: Message, state: FSMContext):
+
     await state.update_data(name=message.text)
+    await state.set_state(FSMFillAppointmentForm.fill_phone_number)
+    await message.answer(APPOINTMENT_LEXICON['fill_phone_number'])
+
+
+@router.message(StateFilter(FSMFillAppointmentForm.fill_phone_number))
+async def get_phone_number_process(message: Message, state: FSMContext, session: AsyncSession):
+    await state.update_data(phone_number=message.text)
     data = await state.get_data()
 
     hours, minutes = data['time'].split(':')
@@ -116,6 +122,7 @@ async def get_phone_number_process(message: Message, state: FSMContext, session:
 
     admin_status = await get_admin_status(session=session, user_id=message.from_user.id)
 
+    # Если необходимо отредактировать запись
     if 'id' in data.keys():
         await app_repo.update_appointment(data=data)
         await state.clear()
@@ -123,10 +130,65 @@ async def get_phone_number_process(message: Message, state: FSMContext, session:
                                                                                             admin_status=admin_status))
 
     else:
-
-        await app_repo.add(patient=data['name'], department_id=data['department_id'], doctor_id=data['doctor_id'],
-                           datetime=data['date'])
+    # Если необходимо добавить новую запись
+        await app_repo.add(patient=data['name'], phone_number=data['phone_number'],
+                           department_id=data['department_id'], doctor_id=data['doctor_id'], datetime=data['date'])
         await state.clear()
         await message.answer(APPOINTMENT_LEXICON['success'].
                              format(data['name'], data['date'].strftime("%d/%m/%Y"), data['time'], data['doctor']),
                              reply_markup=kb_builder(data=MAIN_KB_LEXICON, admin_status=admin_status))
+
+
+# Редактирование записей
+@router.message(F.text == ADMIN_KB_LEXICON['edit_appointment'], AdminFilter())
+async def edit_appointment_process(message: Message, state: FSMContext, session: AsyncSession):
+    app_repo = AppointmentsRepository(session)
+    appointments = await app_repo.get_appointments()
+
+    if appointments:
+        await state.set_state(FSMFillAppointmentForm.edit_appointment)
+        await message.answer(APPOINTMENT_LEXICON['choose_appointment'], reply_markup=kb_builder(data=appointments,
+                                                                                                cancel_btn=True))
+    else:
+        await message.answer(APPOINTMENT_LEXICON['no_appointments'])
+
+
+@router.message(StateFilter(FSMFillAppointmentForm.edit_appointment), AdminFilter())
+async def get_appointment_info(message: Message, state: FSMContext, session: AsyncSession):
+    id, patient = message.text.split(', ')
+
+    app_repo = AppointmentsRepository(session)
+    depo_repo = DepartmentsRepository(session)
+
+    data = await depo_repo.get_all_departments()
+    app = await app_repo.get_appointment_by_id(id)
+
+    await state.update_data(id=id)
+    await state.set_state(FSMFillAppointmentForm.fill_specialization)
+    await message.answer(APPOINTMENT_LEXICON['appointment_info'].format(app['department'], app['doctor'],
+                                                                        app['date'], app['time'], app['patient']))
+
+    await message.answer(APPOINTMENT_LEXICON['choose_department'], reply_markup=kb_builder(data=data, cancel_btn=True))
+
+
+# Процесс удаления записи к врачу в админ панели
+@router.message(F.text == ADMIN_KB_LEXICON['delete_appointment'], AdminFilter())
+async def process_choose_appointment_command(message: Message, session: AsyncSession, state: FSMContext):
+    app_repo = AppointmentsRepository(session)
+    data = await app_repo.get_appointments()
+
+    await state.set_state(FSMFillAppointmentForm.choose_appointment)
+    await message.answer(APPOINTMENT_LEXICON['choose_appointment_for_delete'],
+                         reply_markup=kb_builder(data=data, cancel_btn=True))
+
+
+@router.message(StateFilter(FSMFillAppointmentForm.choose_appointment))
+async def process_delete_appointment_command(message: Message, session: AsyncSession):
+    app_repo = AppointmentsRepository(session)
+    id, _ = message.text.split(', ')
+
+    await app_repo.delete_appointment(app_id=int(id))
+
+    data = await app_repo.get_appointments()
+    await message.answer(APPOINTMENT_LEXICON['appointment_deleted'], reply_markup=kb_builder(data=data,
+                                                                                             cancel_btn=True))

@@ -6,7 +6,6 @@ from database.repositories.service_repository import ServiceRepository
 from database.repositories.user_repository import UserRepository
 
 
-
 class FAQFilter(Filter):
     async def __call__(self, message: Message, session: AsyncSession) -> bool:
         faq_repo = FaqRepository(session)
@@ -26,6 +25,5 @@ class AdminFilter(Filter):
         user_repo = UserRepository(session)
         user_id = message.from_user.id
         admin_status = await user_repo.get_admin_status(user_id)
-
         return admin_status is True
 

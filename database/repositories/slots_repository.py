@@ -9,12 +9,16 @@ class SlotsRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def add_slots(self, doctor_id, time):
+    async def add(self, doctor_id, time):
         if time in await self.get_doctor_slots(doctor_id):
-            return True
+            return False
         self.session.add(Slots(doctor_id=doctor_id, time=time))
         await self.session.commit()
-        return False
+        return True
+
+    async def get_by_doctor_id_and_time(self, doctor_id, time):
+        # Select time from slots where doctor_id and time
+        pass
 
     async def get_doctor_slots(self, doctor_id):
         slots = (await self.session.execute(select(Slots).filter_by(doctor_id=doctor_id))).scalars()

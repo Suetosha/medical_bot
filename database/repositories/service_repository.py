@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from database.models import Services
-from sqlalchemy import select
+from sqlalchemy import select, delete
 
 
 class ServiceRepository:
@@ -19,3 +19,7 @@ class ServiceRepository:
     async def get_answer_by_service(self, service):
         answer = (await self.session.execute(select(Services).filter_by(service=service))).scalar_one()
         return answer
+
+    async def delete_service(self, service):
+        await self.session.execute(delete(Services).where(Services.service == service))
+        await self.session.commit()

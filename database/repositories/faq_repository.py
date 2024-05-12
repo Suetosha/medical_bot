@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from database.models import Faq
-from sqlalchemy import select
+from sqlalchemy import select, delete
 
 
 class FaqRepository:
@@ -19,3 +19,7 @@ class FaqRepository:
     async def get_answer_by_question(self, question):
         answer = (await self.session.execute(select(Faq).filter_by(question=question))).scalar_one()
         return answer
+
+    async def delete_faq(self, question):
+        await self.session.execute(delete(Faq).where(Faq.question == question))
+        await self.session.commit()

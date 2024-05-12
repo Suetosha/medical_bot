@@ -68,6 +68,7 @@ class Appointments(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     patient: Mapped[str] = mapped_column(String)
+    phone_number: Mapped[str] = mapped_column(String)
     department_id: Mapped[int] = mapped_column(ForeignKey("departments.id"))
     doctor_id: Mapped[int] = mapped_column(ForeignKey("doctors.id"))
     date_time = mapped_column(DateTime)

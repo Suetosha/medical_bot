@@ -39,16 +39,13 @@ async def process_cancel_command(message: Message, state: FSMContext, session: A
                                                                                  admin_status=admin_status))
 
 
+# Вывод времени работы клиники
 @router.message(F.text == MAIN_KB_LEXICON['clinic_schedule'])
 async def process_schedule_command(message: Message):
     await message.answer(CLINIC_SCHEDULE['info'], parse_mode="HTML")
 
 
+# Вывод контактной информации
 @router.message(F.text == MAIN_KB_LEXICON['contact_information'])
 async def process_schedule_command(message: Message):
     await message.answer(CONTACT_INFORMATION['info'], parse_mode="HTML")
-
-
-
-
-
