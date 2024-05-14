@@ -59,9 +59,3 @@ class FSMFillSlotForm(StatesGroup):
     get_department = State()
     get_doctor = State()
     delete_slot_process = State()
-
-
-
-
-
-

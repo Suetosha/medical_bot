@@ -24,4 +24,3 @@ class UserRepository:
         new_status = False if status else True
         await self.session.execute(update(User).where(User.telegram_id == user_id).values(is_admin=new_status))
         await self.session.commit()
-

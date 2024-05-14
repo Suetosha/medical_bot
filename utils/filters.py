@@ -9,14 +9,14 @@ from database.repositories.user_repository import UserRepository
 class FAQFilter(Filter):
     async def __call__(self, message: Message, session: AsyncSession) -> bool:
         faq_repo = FaqRepository(session)
-        questions = await faq_repo.get_questions()
+        questions = await faq_repo.get_all()
         return message.text in questions
 
 
 class ServicesFilter(Filter):
     async def __call__(self, message: Message, session: AsyncSession) -> bool:
         service_repo = ServiceRepository(session)
-        services = await service_repo.get_services()
+        services = await service_repo.get_all()
         return message.text in services
 
 
@@ -26,4 +26,3 @@ class AdminFilter(Filter):
         user_id = message.from_user.id
         admin_status = await user_repo.get_admin_status(user_id)
         return admin_status is True
-

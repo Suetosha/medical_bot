@@ -18,7 +18,7 @@ router = Router()
 
 
 @router.message(CommandStart())
-async def process_start_command(message: Message, session: AsyncSession, state: FSMContext):
+async def start_command(message: Message, session: AsyncSession, state: FSMContext):
     user_repo = UserRepository(session)
     user_id = message.from_user.id
 
@@ -32,7 +32,7 @@ async def process_start_command(message: Message, session: AsyncSession, state: 
 
 
 @router.message(F.text == 'Отменить')
-async def process_cancel_command(message: Message, state: FSMContext, session: AsyncSession):
+async def cancel_command(message: Message, state: FSMContext, session: AsyncSession):
     admin_status = await get_admin_status(session=session, user_id=message.from_user.id)
     await state.clear()
     await message.answer(MAIN_MENU_LEXICON['main_menu'], reply_markup=kb_builder(data=MAIN_KB_LEXICON,
@@ -41,11 +41,11 @@ async def process_cancel_command(message: Message, state: FSMContext, session: A
 
 # Вывод времени работы клиники
 @router.message(F.text == MAIN_KB_LEXICON['clinic_schedule'])
-async def process_schedule_command(message: Message):
+async def schedule_command(message: Message):
     await message.answer(CLINIC_SCHEDULE['info'], parse_mode="HTML")
 
 
 # Вывод контактной информации
 @router.message(F.text == MAIN_KB_LEXICON['contact_information'])
-async def process_schedule_command(message: Message):
+async def contact_information_command(message: Message):
     await message.answer(CONTACT_INFORMATION['info'], parse_mode="HTML")

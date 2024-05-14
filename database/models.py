@@ -1,7 +1,8 @@
 import datetime
-from sqlalchemy.orm import DeclarativeBase
+
+from sqlalchemy.orm import DeclarativeBase, relationship
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import Text, String, ForeignKey, DateTime
+from sqlalchemy import Text, String, ForeignKey, Time, Date
 
 
 class Base(DeclarativeBase):
@@ -32,47 +33,49 @@ class CallRequest(Base):
     phone_number: Mapped[str] = mapped_column(String)
 
 
-class Services(Base):
+class Service(Base):
     __tablename__ = 'services'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    service: Mapped[str] = mapped_column(Text)
+    name: Mapped[str] = mapped_column(Text)
     answer: Mapped[str] = mapped_column(Text)
 
 
-class Departments(Base):
+class Department(Base):
     __tablename__ = 'departments'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    specialization: Mapped[str] = mapped_column(String)
+    name: Mapped[str] = mapped_column(String)
 
 
-class Doctors(Base):
+class Doctor(Base):
     __tablename__ = 'doctors'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    doctor: Mapped[str] = mapped_column(String)
+    name: Mapped[str] = mapped_column(String)
+
     department_id: Mapped[int] = mapped_column(ForeignKey("departments.id"))
+    department: Mapped[Department] = relationship()
 
 
-class Slots(Base):
+class Slot(Base):
     __tablename__ = 'slots'
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    time: Mapped[datetime.time] = mapped_column(Time)
+
     doctor_id: Mapped[int] = mapped_column(ForeignKey("doctors.id"))
-    time: Mapped[str] = mapped_column(String)
+    doctor: Mapped[Doctor] = relationship()
 
 
-class Appointments(Base):
+class Appointment(Base):
     __tablename__ = 'appointments'
 
     id: Mapped[int] = mapped_column(primary_key=True)
     patient: Mapped[str] = mapped_column(String)
     phone_number: Mapped[str] = mapped_column(String)
-    department_id: Mapped[int] = mapped_column(ForeignKey("departments.id"))
+    date: Mapped[datetime.date] = mapped_column(Date)
+    time: Mapped[datetime.time] = mapped_column(Time)
+
     doctor_id: Mapped[int] = mapped_column(ForeignKey("doctors.id"))
-    date_time = mapped_column(DateTime)
-
-
-
-
+    doctor: Mapped[Doctor] = relationship()

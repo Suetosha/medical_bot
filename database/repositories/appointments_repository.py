@@ -1,54 +1,55 @@
-from datetime import datetime
-
 from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from database.models import Appointments
-from database.repositories.departments_repository import DepartmentsRepository
-from database.repositories.doctors_repository import DoctorsRepository
+from database.models import Appointment, Doctor, Department
 
 
 class AppointmentsRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def add(self, patient, phone_number, department_id, doctor_id, datetime):
-        self.session.add(Appointments(patient=patient, phone_number=phone_number, department_id=department_id,
-                                      doctor_id=doctor_id, date_time=datetime))
+    async def add(self, patient, phone_number, doctor_id, date, time):
+        self.session.add(Appointment(patient=patient, phone_number=phone_number,
+                                     doctor_id=doctor_id, date=date, time=time))
         await self.session.commit()
 
-    async def get_appointments(self):
-        appointments = (await self.session.scalars(select(Appointments))).all()
+    async def get_all(self):
+        appointments = (await self.session.scalars(select(Appointment))).all()
         appointments = [f'{i.id}, {i.patient}' for i in appointments]
         return appointments
 
-    async def get_appointment_by_id(self, id):
-        app = (await self.session.execute(select(Appointments).filter_by(id=id))).scalar_one()
+    async def get_by_date_and_doctor_name(self, selected_date, doctor_name):
+        closed_slots = (await self.session.execute(select(Appointment.time)
+                                                   .join(Doctor)
+                                                   .filter_by(name=doctor_name)
+                                                   .filter(Appointment.date == selected_date)
+                                                   .order_by(Appointment.time))).scalars()
+        return closed_slots
 
-        depo_repo = DepartmentsRepository(self.session)
-        doc_repo = DoctorsRepository(self.session)
+    async def get_by_id(self, app_id):
+        res = (await self.session.execute(select(Appointment, Doctor, Department)
+                                          .join(Appointment.doctor)
+                                          .join(Doctor.department)
+                                          .filter(Appointment.id == app_id))).first()
 
-        department = await depo_repo.get_department_by_id(app.department_id)
-        doctor = await doc_repo.get_doctor_by_id(app.doctor_id)
+        if res is not None:
+            app = res[0]
+            app = {'patient': app.patient, 'department': app.doctor.department.name,
+                   'department_id': app.doctor.department_id, 'doctor_id': app.doctor.id,
+                   'doctor': app.doctor.name, 'date': app.date, 'time': app.time}
 
-        date = datetime.strftime(app.date_time, '%d/%m/%Y')
-        time = datetime.strftime(app.date_time, '%H:%M')
+            return app
 
-        app = {'patient': app.patient, 'department': department,
-               'doctor': doctor, 'doctor_id': app.doctor_id, 'date': date, 'time': time}
-
-        return app
-
-    async def delete_appointment(self, app_id):
-        await self.session.execute(delete(Appointments).where(Appointments.id == app_id))
+    async def delete(self, app_id):
+        await self.session.execute(delete(Appointment).where(Appointment.id == app_id))
         await self.session.commit()
 
-    async def update_appointment(self, data) -> None:
+    async def update(self, data) -> None:
 
-        await self.session.execute(update(Appointments).where(Appointments.id == data['id']).values(
+        await self.session.execute(update(Appointment).where(Appointment.id == data['id']).values(
             patient=data['name'],
             phone_number=data['phone_number'],
-            department_id=data['department_id'],
             doctor_id=data['doctor_id'],
-            date_time=data['date']
+            date=data['date'],
+            time=data['time']
         ))
         await self.session.commit()

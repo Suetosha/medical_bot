@@ -26,7 +26,7 @@ dp.include_router(services_handlers.router)
 dp.include_router(slots_handlers.router)
 
 
-async def on_startup(bot):
+async def on_startup():
 
     # Если параметр clear_db = True, то очищается база
     clear_db = False
@@ -39,7 +39,7 @@ async def on_startup(bot):
     print('Бот включен')
 
 
-async def on_shutdown(bot):
+async def on_shutdown():
     print('Бот выключен')
 
 

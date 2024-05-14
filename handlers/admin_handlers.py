@@ -15,7 +15,7 @@ router = Router()
 
 
 @router.message(F.text == ADMIN_LEXICON['admin'])
-async def process_admin_command(message: Message, session: AsyncSession):
+async def admin_command(message: Message, session: AsyncSession):
     new_admin_status = await change_admin_status(session, message.from_user.id)
     await message.answer(ADMIN_LEXICON['admin_true'] if new_admin_status
                          else ADMIN_LEXICON['admin_false'], parse_mode="HTML",

@@ -27,21 +27,21 @@ async def call_request_command(message: Message, state: FSMContext):
 
 
 @router.message(StateFilter(FSMFillRequestForm.fill_name))
-async def fill_problem_command(message: Message, state: FSMContext):
+async def fill_problem_process(message: Message, state: FSMContext):
     await state.set_state(FSMFillRequestForm.fill_problem)
     await state.update_data(name=message.text)
     await message.answer(CALL_REQUEST_LEXICON['fill_problem'], reply_markup=kb_builder(data=None, cancel_btn=True))
 
 
 @router.message(StateFilter(FSMFillRequestForm.fill_problem))
-async def fill_phone_number_command(message: Message, state: FSMContext):
+async def fill_phone_number_process(message: Message, state: FSMContext):
     await state.set_state(FSMFillRequestForm.fill_phone_number)
     await state.update_data(problem=message.text)
     await message.answer(CALL_REQUEST_LEXICON['fill_phone_number'], reply_markup=kb_builder(data=None, cancel_btn=True))
 
 
 @router.message(StateFilter(FSMFillRequestForm.fill_phone_number))
-async def get_data_command(message: Message, state: FSMContext, session: AsyncSession):
+async def get_data_process(message: Message, state: FSMContext, session: AsyncSession):
     await state.update_data(phone_number=str(message.text))
 
     data = await state.get_data()
@@ -59,38 +59,38 @@ async def get_data_command(message: Message, state: FSMContext, session: AsyncSe
 
 # Процесс просмотра заявки на звонок в админ панели
 @router.message(F.text == ADMIN_KB_LEXICON['show_call_requests'], AdminFilter())
-async def process_choose_call_request_command(message: Message, session: AsyncSession, state: FSMContext):
+async def choose_call_request_command(message: Message, session: AsyncSession, state: FSMContext):
     call_request_repo = CallRequestRepository(session)
-    data = await call_request_repo.get_call_requests()
+    data = await call_request_repo.get_all()
     await state.set_state(FSMFillRequestForm.show_requests)
     await message.answer(CALL_REQUEST_LEXICON['choose_call_request'],
                          reply_markup=kb_builder(data=data, cancel_btn=True))
 
 
 @router.message(StateFilter(FSMFillRequestForm.show_requests))
-async def process_get_call_request_command(message: Message, session: AsyncSession):
+async def get_call_request_process(message: Message, session: AsyncSession):
     call_request_repo = CallRequestRepository(session)
-    id, _ = message.text.split(', ')
-    request = await call_request_repo.get_call_request_by_id(id=id)
-    data = await call_request_repo.get_call_requests()
+    request_id, _ = message.text.split(', ')
+    request = await call_request_repo.get_by_id(request_id=request_id)
+    data = await call_request_repo.get_all()
     await message.answer(request, reply_markup=kb_builder(data=data, cancel_btn=True))
 
 
 # Процесс удаления заявки на звонок в админ панели
 @router.message(F.text == ADMIN_KB_LEXICON['delete_call_request'], AdminFilter())
-async def process_choose_call_request_command(message: Message, session: AsyncSession, state: FSMContext):
+async def choose_call_request_process(message: Message, session: AsyncSession, state: FSMContext):
     call_request_repo = CallRequestRepository(session)
-    data = await call_request_repo.get_call_requests()
+    data = await call_request_repo.get_all()
     await state.set_state(FSMFillRequestForm.delete_request)
     await message.answer(CALL_REQUEST_LEXICON['choose_call_request_for_delete'],
                          reply_markup=kb_builder(data=data, cancel_btn=True))
 
 
 @router.message(StateFilter(FSMFillRequestForm.delete_request))
-async def process_delete_call_request_command(message: Message, session: AsyncSession):
+async def delete_call_request_process(message: Message, session: AsyncSession):
     call_request_repo = CallRequestRepository(session)
-    id, _ = message.text.split(', ')
-    await call_request_repo.delete_call_request(id=id)
-    data = await call_request_repo.get_call_requests()
+    request_id, _ = message.text.split(', ')
+    await call_request_repo.delete(request_id=request_id)
+    data = await call_request_repo.get_all()
     await message.answer(CALL_REQUEST_LEXICON['call_request_deleted'], reply_markup=kb_builder(data=data,
                                                                                                cancel_btn=True))

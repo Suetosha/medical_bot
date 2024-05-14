@@ -11,17 +11,16 @@ class CallRequestRepository:
         self.session.add(CallRequest(name=name, problem=problem, phone_number=phone_number))
         await self.session.commit()
 
-    async def get_call_requests(self):
+    async def get_all(self):
         data = (await self.session.scalars(select(CallRequest))).all()
         data = [f'{i.id}, {i.name}' for i in data]
         return data
 
-    async def get_call_request_by_id(self, id):
-        request = (await self.session.execute(select(CallRequest).filter_by(id=id))).scalar_one()
+    async def get_by_id(self, request_id):
+        request = (await self.session.execute(select(CallRequest).filter_by(id=request_id))).scalar_one()
         request = f'Имя: {request.name}\nПроблема: {request.problem}\nНомер телефона: {request.phone_number}'
         return request
 
-    async def delete_call_request(self, id):
-        await self.session.execute(delete(CallRequest).where(CallRequest.id == id))
+    async def delete(self, request_id):
+        await self.session.execute(delete(CallRequest).where(CallRequest.id == request_id))
         await self.session.commit()
-

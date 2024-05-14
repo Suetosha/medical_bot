@@ -1,3 +1,5 @@
+from datetime import time
+
 from aiogram import Router, F
 from aiogram.fsm.state import default_state
 from aiogram.types import Message
@@ -27,9 +29,9 @@ router = Router()
 
 # Добавление нового слота к врачу
 @router.message(F.text == ADMIN_KB_LEXICON['add_new_slot'], AdminFilter())
-async def add_new_slots(message: Message, state: FSMContext, session: AsyncSession):
+async def add_new_slots_command(message: Message, state: FSMContext, session: AsyncSession):
     dep_repo = DepartmentsRepository(session)
-    departments = await dep_repo.get_all_departments()
+    departments = await dep_repo.get_all()
 
     await state.set_state(FSMFillSlotForm.fill_department)
     await message.answer(SLOTS_LEXICON['fill_department'], reply_markup=kb_builder(data=departments, cancel_btn=True))
@@ -40,14 +42,14 @@ async def fill_department_process(message: Message, state: FSMContext, session: 
     department = message.text
 
     doc_repo = DoctorsRepository(session)
-    doctors = await doc_repo.get_doctors_by_department(department)
+    doctors = await doc_repo.get_by_department(department)
 
     await state.set_state(FSMFillSlotForm.fill_doctor)
     await message.answer(SLOTS_LEXICON['fill_doctor'], reply_markup=kb_builder(data=doctors, cancel_btn=True))
 
 
 @router.message(StateFilter(FSMFillSlotForm.fill_doctor))
-async def get_doctor(message: Message, state: FSMContext, session: AsyncSession):
+async def get_doctor_process(message: Message, state: FSMContext, session: AsyncSession):
     doctor = message.text
 
     doc_repo = DoctorsRepository(session)
@@ -59,20 +61,23 @@ async def get_doctor(message: Message, state: FSMContext, session: AsyncSession)
 
 
 @router.message(StateFilter(FSMFillSlotForm.fill_time))
-async def get_time(message: Message, state: FSMContext, session: AsyncSession):
+async def get_time_process(message: Message, state: FSMContext, session: AsyncSession):
     if re.fullmatch(r'([01]?[0-9]|2[0-3]):[0-5][0-9]', message.text):
-        await state.update_data(time=message.text)
-        doctor_id, doctor, time = (await state.get_data()).values()
+        hour, minutes = message.text.split(':')
+
+        app_time = time(int(hour), int(minutes))
+
+        doctor_id, doctor = (await state.get_data()).values()
 
         slots_repo = SlotsRepository(session)
 
-        is_added = await slots_repo.add(doctor_id=doctor_id, time=time)
+        is_added = await slots_repo.add(doctor=doctor, doctor_id=doctor_id, time=app_time)
 
         await state.clear()
 
         admin_status = await get_admin_status(session=session, user_id=message.from_user.id)
 
-        await message.answer(SLOTS_LEXICON['slot_added'].format(time, doctor) if is_added
+        await message.answer(SLOTS_LEXICON['slot_added'].format(message.text, doctor) if is_added
                              else SLOTS_LEXICON['slot_already_added'],
                              reply_markup=kb_builder(data=MAIN_KB_LEXICON, admin_status=admin_status))
     else:
@@ -81,9 +86,9 @@ async def get_time(message: Message, state: FSMContext, session: AsyncSession):
 
 # Удаление слотов у врача
 @router.message(F.text == ADMIN_KB_LEXICON['delete_doctors_slot'], StateFilter(default_state), AdminFilter())
-async def delete_slot_process(message: Message, state: FSMContext, session: AsyncSession):
+async def delete_slot_command(message: Message, state: FSMContext, session: AsyncSession):
     dep_repo = DepartmentsRepository(session)
-    departments = await dep_repo.get_all_departments()
+    departments = await dep_repo.get_all()
 
     await state.set_state(FSMFillSlotForm.get_department)
     await message.answer(SLOTS_LEXICON['fill_department'], reply_markup=kb_builder(data=departments, cancel_btn=True))
@@ -94,22 +99,21 @@ async def fill_department_process(message: Message, state: FSMContext, session: 
     department = message.text
 
     doc_repo = DoctorsRepository(session)
-    doctors = await doc_repo.get_doctors_by_department(department)
+    doctors = await doc_repo.get_by_department(department)
 
     await state.set_state(FSMFillSlotForm.get_doctor)
-    await message.answer(SLOTS_LEXICON['fill_doctor'], reply_markup=kb_builder(data=doctors))
+    await message.answer(SLOTS_LEXICON['fill_doctor'], reply_markup=kb_builder(data=doctors, cancel_btn=True))
 
 
 @router.message(StateFilter(FSMFillSlotForm.get_doctor))
 async def fill_doctor_process(message: Message, state: FSMContext, session: AsyncSession):
     doctor = message.text
 
-    doc_repo = DoctorsRepository(session)
-    doctor_id = await doc_repo.get_id_by_doctor(doctor)
-    await state.update_data(doctor_id=doctor_id)
+    await state.update_data(doctor=doctor)
 
     slots_repo = SlotsRepository(session)
-    slots = await slots_repo.get_doctor_slots(doctor_id)
+    slots = await slots_repo.get_doctor_slots(doctor)
+    slots = [i.strftime('%H:%M') for i in slots]
 
     await state.set_state(FSMFillSlotForm.delete_slot_process)
     await message.answer(SLOTS_LEXICON['delete_slot_process'], reply_markup=kb_builder(data=slots,
@@ -119,11 +123,13 @@ async def fill_doctor_process(message: Message, state: FSMContext, session: Asyn
 @router.message(StateFilter(FSMFillSlotForm.delete_slot_process))
 async def delete_slot_process(message: Message, state: FSMContext, session: AsyncSession):
     await state.update_data(time=message.text)
-    doctor_id, time = (await state.get_data()).values()
+    doctor_name, slot_time = (await state.get_data()).values()
+    hours, minutes = slot_time.split(':')
 
     slots_repo = SlotsRepository(session)
-    await slots_repo.delete_slot(doctor_id=doctor_id, time=time)
-    slots = await slots_repo.get_doctor_slots(doctor_id)
-    await state.clear()
-    await message.answer(SLOTS_LEXICON['slot_deleted'].format(time), reply_markup=kb_builder(data=slots,
-                                                                                             cancel_btn=True))
+    await slots_repo.delete(doctor_name=doctor_name, time=time(hour=int(hours), minute=int(minutes)))
+
+    slots = await slots_repo.get_doctor_slots(doctor_name)
+    slots = [i.strftime('%H:%M') for i in slots]
+    await message.answer(SLOTS_LEXICON['slot_deleted'].format(slot_time), reply_markup=kb_builder(data=slots,
+                                                                                                  cancel_btn=True))

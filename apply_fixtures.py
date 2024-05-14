@@ -4,10 +4,12 @@ from dotenv import load_dotenv
 from asyncio import run
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
 from database.repositories.faq_repository import FaqRepository
 from database.repositories.service_repository import ServiceRepository
 from database.repositories.departments_repository import DepartmentsRepository
 from database.repositories.doctors_repository import DoctorsRepository
+
 from database.fixtures.departments import Departments
 from database.fixtures.doctors import Doctors
 from database.fixtures.faq import Questions
@@ -43,8 +45,8 @@ async def add_doctors():
     async with session_maker() as session:
         doctors_repo = DoctorsRepository(session)
         for department, doctors in Doctors.items():
-            for doctor in doctors:
-                await doctors_repo.add(doctor=doctor, department=department)
+            for doctor_name in doctors:
+                await doctors_repo.add(name=doctor_name, department=department)
 
 
 async def main():

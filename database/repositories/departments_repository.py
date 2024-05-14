@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from database.models import Departments
+from database.models import Department
 from sqlalchemy import select
 
 
@@ -7,20 +7,20 @@ class DepartmentsRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def add(self, specialization):
-        self.session.add(Departments(specialization=specialization))
+    async def add(self, department_name):
+        self.session.add(Department(name=department_name))
         await self.session.commit()
 
-    async def get_id_by_department_name(self, department):
-        department_id = (await self.session.execute(select(Departments)
-                                                    .filter_by(specialization=department))).scalar_one().id
+    async def get_id_by_department_name(self, department_name):
+        department_id = (await self.session.execute(select(Department)
+                                                    .filter_by(name=department_name))).scalar_one().id
         return department_id
 
-    async def get_all_departments(self):
-        data = (await self.session.scalars(select(Departments))).all()
-        data = [i.specialization for i in data]
+    async def get_all(self):
+        data = (await self.session.scalars(select(Department))).all()
+        data = [i.name for i in data]
         return data
 
-    async def get_department_by_id(self, id):
-        department = (await self.session.execute(select(Departments).filter_by(id=id))).scalar_one().specialization
+    async def get_by_id(self, department_id):
+        department = (await self.session.execute(select(Department).filter_by(id=department_id))).scalar_one().name
         return department

@@ -1,7 +1,5 @@
-from datetime import datetime as dt
-
 from sqlalchemy.ext.asyncio import AsyncSession
-from database.models import Appointments, Slots
+from database.models import Slot, Doctor
 from sqlalchemy import select, delete
 
 
@@ -9,36 +7,24 @@ class SlotsRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def add(self, doctor_id, time):
-        if time in await self.get_doctor_slots(doctor_id):
+    async def add(self, doctor_id, doctor, time):
+        if time in await self.get_doctor_slots(doctor):
             return False
-        self.session.add(Slots(doctor_id=doctor_id, time=time))
+        self.session.add(Slot(doctor_id=doctor_id, time=time))
         await self.session.commit()
         return True
 
-    async def get_by_doctor_id_and_time(self, doctor_id, time):
-        # Select time from slots where doctor_id and time
-        pass
-
-    async def get_doctor_slots(self, doctor_id):
-        slots = (await self.session.execute(select(Slots).filter_by(doctor_id=doctor_id))).scalars()
-        slots = list(sorted([i.time for i in slots]))
+    async def get_doctor_slots(self, doctor_name):
+        slots = (await self.session.execute(select(Slot.time)
+                                            .join(Doctor)
+                                            .filter_by(name=doctor_name).order_by(Slot.time))).scalars()
+        slots = [i for i in slots]
         return slots
 
-    async def get_opened_slots(self, day,  doctor_id):
-        all_slots = await self.get_doctor_slots(doctor_id)
-        closed_slots = (await self.session.execute(select(Appointments).filter_by(doctor_id=doctor_id))).scalars()
-
-        closed_slots = [i.date_time for i in closed_slots]
-
-        closed_slots = [dt.strftime(i, '%H:%M') for i in closed_slots if i.date().day == day]
-
-        free_slots = list(sorted([i for i in all_slots if i not in closed_slots]))
-
-        return free_slots
-
-    async def delete_slot(self, doctor_id, time):
-        await self.session.execute(delete(Slots).where(Slots.doctor_id == doctor_id, Slots.time == time))
+    async def delete(self, doctor_name, time):
+        slot = (await self.session.scalars(select(Slot).join(Doctor)
+                                           .filter(Doctor.name == doctor_name, Slot.time == time))).first()
+        await self.session.delete(slot)
         await self.session.commit()
 
 

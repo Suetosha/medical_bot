@@ -21,6 +21,3 @@ def kb_builder(data: None | dict | list, cancel_btn=False, admin_status=False):
 
     markup = ReplyKeyboardMarkup(keyboard=buttons, resize_keyboard=True)
     return markup
-
-
-
