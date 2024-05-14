@@ -4,6 +4,7 @@ from handlers import (main_handlers, admin_handlers, faq_handlers,
                       call_request_handlers, services_handlers, appointment_handlers, slots_handlers)
 
 from dotenv import load_dotenv
+from aiogram.client.session.aiohttp import AiohttpSession
 import os
 
 load_dotenv()
@@ -12,7 +13,8 @@ from middlewares.db import DataBaseSession
 from database.engine import sync_db, drop_db, session_maker
 
 
-bot = Bot(token=os.getenv('BOT_TOKEN'), parse_mode="HTML")
+session = AiohttpSession(proxy=os.getenv('PROXY'))
+bot = Bot(token=os.getenv('BOT_TOKEN'), session=session, parse_mode="HTML")
 dp = Dispatcher()
 
 
